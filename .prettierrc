@@ -1,0 +1,12 @@
+{
+  "trailingComma": "es5",
+  "endOfLine": "auto",
+  "tabWidth": 2,
+  "singleQuote": true,
+  "prettier/prettier": [
+    "error",
+    {
+      "endOfLine": "auto"
+    }
+  ]
+}
