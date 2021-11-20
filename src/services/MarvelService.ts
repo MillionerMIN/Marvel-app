@@ -35,26 +35,26 @@ export class MarvelService {
 }
 
 export type CharacterType = {
-  name: null | string;
-  description: null | string;
-  thumbnail: null | string;
-  homepage: null | string;
-  wiki: null | string;
+  name: string | undefined
+  description: string | undefined
+  thumbnail: string | undefined
+  homepage: string | undefined
+  wiki: string | undefined
 };
 
 type CharacterApiType = {
-  name: null | string;
-  description: null | string;
+  name: undefined | string;
+  description: undefined | string;
   thumbnail: {
-    path: null | string;
-    extension: null | string;
+    path: undefined | string;
+    extension: undefined | string;
   };
   urls: [
     {
-      url: null | string;
+      url: undefined | string;
     },
     {
-      url: null | string;
+      url: undefined | string;
     }
   ];
 };

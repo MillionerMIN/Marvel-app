@@ -1,7 +1,9 @@
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
-import { Component, ReactNode } from 'react';
-import { MarvelService } from '../../services/MarvelService';
+import { Component } from 'react';
+import { CharacterType, MarvelService } from '../../services/MarvelService';
+import { Spinner } from '../common/spinner/Spinner';
+import { MessageError } from '../common/error/MessageError';
 
 class RandomChar extends Component {
   constructor(props: any) {
@@ -9,47 +11,37 @@ class RandomChar extends Component {
     this.updateCharacter();
   }
   state = {
-    char: {},
+    char: {} as CharacterType,
+    loading: true,
+    error: false,
   };
   marvelService = new MarvelService();
 
-  onChatLoaded = (char: any) => {
-    this.setState({ char });
+  onChatLoaded = (char: CharacterType) => {
+    this.setState({ char, loading: false });
+  };
+  onError = () => {
+    this.setState({ loading: false, error: true });
   };
 
   updateCharacter = () => {
     const id = Math.floor(Math.random() * (1011400 - 1011005) + 1011005);
-    this.marvelService.getCharacter(id).then(this.onChatLoaded);
+    this.marvelService
+      .getCharacter(id)
+      .then(this.onChatLoaded)
+      .catch(this.onError);
   };
-  render(): ReactNode {
-    const {
-      //@ts-ignore
-      char: { name, description, thumbnail, homepage, wiki },
-    } = this.state;
-    const correctDesc = description
-      ? description.slice(0, 250) + '...'
-      : 'Information for this character is not available';
+  render() {
+    const { char, loading, error } = this.state;
+    const spinner = loading ? <Spinner /> : null;
+    const messageError = error ? <MessageError /> : null;
+    const content = !(loading || error) ? <View props={char} /> : null;
+
     return (
       <div className="randomchar">
-        <div className="randomchar__block">
-          <img
-            src={thumbnail}
-            alt="Random character"
-            className="randomchar__img"
-          />
-          <div className="randomchar__info">
-            <p className="randomchar__name">{name}</p>
-            <p className="randomchar__descr">{correctDesc}</p>
-            <div className="randomchar__btns">
-              <a href={homepage} className="button button__main">
-                <div className="inner">homepage</div>
-              </a>
-              <a href={wiki} className="button button__secondary">
-                <div className="inner">Wiki</div>
-              </a>
-            </div>
-          </div>
-        </div>
+        {messageError}
+        {spinner}
+        {content}
         <div className="randomchar__static">
           <p className="randomchar__title">
             Random character for today!
@@ -66,5 +58,34 @@ class RandomChar extends Component {
     );
   }
 }
+
+type ViewPropsType = {
+  props: CharacterType;
+};
+
+const View = (props: ViewPropsType) => {
+  const { name, description, thumbnail, homepage, wiki } = props.props;
+  const correctDesc = description
+    ? description.slice(0, 236) + '...'
+    : 'Information for this character is not available';
+
+  return (
+    <div className="randomchar__block">
+      <img src={thumbnail} alt="Random character" className="randomchar__img" />
+      <div className="randomchar__info">
+        <p className="randomchar__name">{name}</p>
+        <p className="randomchar__descr">{correctDesc}</p>
+        <div className="randomchar__btns">
+          <a href={homepage} className="button button__main">
+            <div className="inner">homepage</div>
+          </a>
+          <a href={wiki} className="button button__secondary">
+            <div className="inner">Wiki</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default RandomChar;
