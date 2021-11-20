@@ -2,6 +2,8 @@ import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 import { Component } from 'react';
 import { CharacterType, MarvelService } from '../../services/MarvelService';
+import { Spinner } from '../common/spinner/Spinner';
+import { MessageError } from '../common/error/MessageError';
 
 class RandomChar extends Component {
   constructor(props: any) {
@@ -15,20 +17,31 @@ class RandomChar extends Component {
   };
   marvelService = new MarvelService();
 
-  onChatLoaded = (char: any) => {
-    this.setState({ char });
+  onChatLoaded = (char: CharacterType) => {
+    this.setState({ char, loading: false });
+  };
+  onError = () => {
+    this.setState({ loading: false, error: true });
   };
 
   updateCharacter = () => {
     const id = Math.floor(Math.random() * (1011400 - 1011005) + 1011005);
-    this.marvelService.getCharacter(id).then(this.onChatLoaded);
+    this.marvelService
+      .getCharacter(id)
+      .then(this.onChatLoaded)
+      .catch(this.onError);
   };
   render() {
     const { char, loading, error } = this.state;
+    const spinner = loading ? <Spinner /> : null;
+    const messageError = error ? <MessageError /> : null;
+    const content = !(loading || error) ? <View props={char} /> : null;
 
     return (
       <div className="randomchar">
-        <View props={char} />
+        {messageError}
+        {spinner}
+        {content}
         <div className="randomchar__static">
           <p className="randomchar__title">
             Random character for today!
@@ -53,7 +66,7 @@ type ViewPropsType = {
 const View = (props: ViewPropsType) => {
   const { name, description, thumbnail, homepage, wiki } = props.props;
   const correctDesc = description
-    ? description.slice(0, 250) + '...'
+    ? description.slice(0, 236) + '...'
     : 'Information for this character is not available';
 
   return (
