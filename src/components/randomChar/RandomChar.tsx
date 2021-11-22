@@ -6,10 +6,6 @@ import { Spinner } from '../common/spinner/Spinner';
 import { MessageError } from '../common/error/MessageError';
 
 class RandomChar extends Component {
-  constructor(props: any) {
-    super(props);
-    this.updateCharacter();
-  }
   state = {
     char: {} as CharacterType,
     loading: true,
@@ -24,6 +20,10 @@ class RandomChar extends Component {
     this.setState({ loading: false, error: true });
   };
 
+  onToggleChar = () => {
+    this.updateCharacter();
+  };
+
   updateCharacter = () => {
     const id = Math.floor(Math.random() * (1011400 - 1011005) + 1011005);
     this.marvelService
@@ -31,6 +31,13 @@ class RandomChar extends Component {
       .then(this.onChatLoaded)
       .catch(this.onError);
   };
+
+  componentDidMount = () => {
+    this.updateCharacter();
+  };
+
+  componentWillUnmount = () => {};
+
   render() {
     const { char, loading, error } = this.state;
     const spinner = loading ? <Spinner /> : null;
@@ -49,7 +56,7 @@ class RandomChar extends Component {
             Do you want to get to know him better?
           </p>
           <p className="randomchar__title">Or choose another one</p>
-          <button className="button button__main">
+          <button className="button button__main" onClick={this.onToggleChar}>
             <div className="inner">try it</div>
           </button>
           <img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />
@@ -66,12 +73,17 @@ type ViewPropsType = {
 const View = (props: ViewPropsType) => {
   const { name, description, thumbnail, homepage, wiki } = props.props;
   const correctDesc = description
-    ? description.slice(0, 236) + '...'
-    : 'Information for this character is not available';
+    ? description.slice(0, 220) + '...'
+    : 'Information for this character is not available.';
+
+  const objectFit =
+    thumbnail?.slice(44) === 'image_not_available.jpg'
+      ? 'randomchar__img randomchar__contain'
+      : 'randomchar__img';
 
   return (
     <div className="randomchar__block">
-      <img src={thumbnail} alt="Random character" className="randomchar__img" />
+      <img src={thumbnail} alt="Random character" className={objectFit} />
       <div className="randomchar__info">
         <p className="randomchar__name">{name}</p>
         <p className="randomchar__descr">{correctDesc}</p>
