@@ -13,30 +13,32 @@ class RandomChar extends Component {
   };
   marvelService = new MarvelService();
 
-  onChatLoaded = (char: CharacterType) => {
-    this.setState({ char, loading: false });
-  };
-  onError = () => {
-    this.setState({ loading: false, error: true });
-  };
-
-  onToggleChar = () => {
-    this.updateCharacter();
-  };
-
-  updateCharacter = () => {
-    const id = Math.floor(Math.random() * (1011400 - 1011005) + 1011005);
-    this.marvelService
-      .getCharacter(id)
-      .then(this.onChatLoaded)
-      .catch(this.onError);
-  };
-
   componentDidMount = () => {
     this.updateCharacter();
   };
 
   componentWillUnmount = () => {};
+
+  onChatLoaded = (char: CharacterType) => {
+    this.setState({ char, loading: false });
+  };
+
+  onCharLoading = () => {
+    this.setState({ loading: true });
+  };
+
+  onError = () => {
+    this.setState({ loading: false, error: true });
+  };
+
+  updateCharacter = () => {
+    const id = Math.floor(Math.random() * (1011400 - 1011005) + 1011005);
+    this.onCharLoading();
+    this.marvelService
+      .getCharacter(id)
+      .then(this.onChatLoaded)
+      .catch(this.onError);
+  };
 
   render() {
     const { char, loading, error } = this.state;
@@ -56,7 +58,10 @@ class RandomChar extends Component {
             Do you want to get to know him better?
           </p>
           <p className="randomchar__title">Or choose another one</p>
-          <button className="button button__main" onClick={this.onToggleChar}>
+          <button
+            className="button button__main"
+            onClick={this.updateCharacter}
+          >
             <div className="inner">try it</div>
           </button>
           <img src={mjolnir} alt="mjolnir" className="randomchar__decoration" />
@@ -76,14 +81,15 @@ const View = (props: ViewPropsType) => {
     ? description.slice(0, 220) + '...'
     : 'Information for this character is not available.';
 
-  const objectFit =
-    thumbnail?.slice(44) === 'image_not_available.jpg'
+  const objectFitStyle =
+    thumbnail ===
+    'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
       ? 'randomchar__img randomchar__contain'
       : 'randomchar__img';
 
   return (
     <div className="randomchar__block">
-      <img src={thumbnail} alt="Random character" className={objectFit} />
+      <img src={thumbnail} alt="Random character" className={objectFitStyle} />
       <div className="randomchar__info">
         <p className="randomchar__name">{name}</p>
         <p className="randomchar__descr">{correctDesc}</p>

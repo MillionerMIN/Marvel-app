@@ -25,24 +25,34 @@ export class MarvelService {
   };
   _transformCharacter = (char: CharacterApiType): CharacterType => {
     return {
+      id: char.id,
       name: char.name,
       description: char.description,
       thumbnail: char.thumbnail.path + '.' + char.thumbnail.extension,
       homepage: char.urls[0].url,
       wiki: char.urls[1].url,
+      comics: char.comics.items,
     };
   };
 }
 
 export type CharacterType = {
-  name: string | undefined
-  description: string | undefined
-  thumbnail: string | undefined
-  homepage: string | undefined
-  wiki: string | undefined
+  id: number | undefined;
+  name: string | undefined;
+  description: string | undefined;
+  thumbnail: string | undefined;
+  homepage: string | undefined;
+  wiki: string | undefined;
+  comics: [
+    {
+      resourceURI: string | undefined;
+      name: string | undefined;
+    }
+  ];
 };
 
 type CharacterApiType = {
+  id: undefined | number;
   name: undefined | string;
   description: undefined | string;
   thumbnail: {
@@ -57,4 +67,12 @@ type CharacterApiType = {
       url: undefined | string;
     }
   ];
+  comics: {
+    items: [
+      {
+        resourceURI: string | undefined;
+        name: string | undefined;
+      }
+    ];
+  };
 };

@@ -4,52 +4,79 @@ import { CharacterType, MarvelService } from '../../services/MarvelService';
 import { MessageError } from '../common/error/MessageError';
 import { Spinner } from '../common/spinner/Spinner';
 
-class CharList extends Component {
+interface ChartListPropsType {
+  onCharSelected: (id: number | null | undefined) => void;
+}
+
+class CharList extends Component<ChartListPropsType> {
   state = {
-    characters: [] as CharacterType[],
+    charList: [] as CharacterType[],
     loading: true,
     error: false,
   };
 
   marvelService = new MarvelService();
 
-  onCharactersLoaded = (characters: CharacterType[]) => {
+  componentDidMount = () => {
+    this.marvelService
+      .getAllCharacters()
+      .then(this.onCharactersLoaded)
+      .catch(this.onError);
+  };
+
+  componentWillUnmount = () => {};
+
+  onCharactersLoaded = (charList: CharacterType[]) => {
     this.setState({
-      characters,
+      charList,
       loading: false,
     });
   };
 
-  componentDidMount = () => {
-    this.marvelService.getAllCharacters().then(this.onCharactersLoaded);
-    console.log('####: charList mount');
+  onError = () => {
+    this.setState({ loading: false, error: true });
   };
 
-  componentWillUnmount = () => {
-    console.log('####: charList unmount');
+  onCharSelected = (charId: number) => {
+    console.log(charId);
+  };
+
+  renderItems = (charList: CharacterType[]) => {
+    const items = this.state.charList.map((item) => {
+      const imgStyle =
+        item.thumbnail ===
+        'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
+          ? 'char__img char__img_unset'
+          : 'char__img';
+
+      return (
+        <li className="char__item" key={item.id}>
+          <img
+            className={imgStyle}
+            src={item.thumbnail}
+            alt={item.name}
+            onClick={() => this.props.onCharSelected(item.id)}
+          />
+          <div className="char__name">{item.name}</div>
+        </li>
+      );
+    });
+
+    return <ul className="char__grid">{items}</ul>;
   };
 
   render() {
-    console.log('####: charList render');
-    const { characters, loading, error } = this.state;
+    const { charList, loading, error } = this.state;
+    const items = this.renderItems(charList);
     const messageError = error ? <MessageError /> : null;
     const spinner = loading ? <Spinner /> : null;
-    const content =
-      !(error || loading) &&
-      characters.map((item) => (
-        <li className="char__item" key={item.name}>
-          <img src={item.thumbnail} alt="abyss" />
-          <div className="char__name">{item.name}</div>
-        </li>
-      ));
+    const content = !(error || loading) && items;
 
     return (
       <div className="char__list">
-        <ul className="char__grid">
-          {messageError}
-          {spinner}
-          {content}
-        </ul>
+        {messageError}
+        {spinner}
+        {content}
         <button className="button button__main button__long">
           <div className="inner">load more</div>
         </button>
