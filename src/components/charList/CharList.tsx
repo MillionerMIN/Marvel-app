@@ -3,6 +3,7 @@ import { Component } from 'react';
 import { CharacterType, MarvelService } from '../../services/MarvelService';
 import { MessageError } from '../common/error/MessageError';
 import { Spinner } from '../common/spinner/Spinner';
+import { runInThisContext } from 'vm';
 
 interface ChartListPropsType {
   onCharSelected: (id: number | null | undefined) => void;
@@ -16,6 +17,7 @@ class CharList extends Component<ChartListPropsType> {
     newItemLoading: false,
     offset: 210,
     charEnded: false,
+    isActive: null,
   };
 
   marvelService = new MarvelService();
@@ -56,6 +58,15 @@ class CharList extends Component<ChartListPropsType> {
     this.setState({ loading: false, error: true });
   };
 
+  //change className in isActive clicking
+  focusOnItem = (id: number | undefined) => {
+    this.setState({
+      isActive: id,
+    });
+  };
+
+  // This method created for optimization,
+  // to avoid placing such a structure in the method render
   renderItems = (charList: CharacterType[]) => {
     const items = charList.map((item) => {
       const imgStyle =
@@ -65,7 +76,15 @@ class CharList extends Component<ChartListPropsType> {
           : 'char__img';
 
       return (
-        <li className="char__item" key={item.id}>
+        <li
+          className={
+            this.state.isActive === item.id
+              ? 'char__item char__item_selected'
+              : 'char__item'
+          }
+          key={item.id}
+          onClick={() => this.focusOnItem(item.id)}
+        >
           <img
             className={imgStyle}
             src={item.thumbnail}
@@ -90,9 +109,6 @@ class CharList extends Component<ChartListPropsType> {
     const styleButton = charEnded
       ? 'button_none'
       : 'button button__main button__long';
-
-    console.log(`ended: ${charEnded}`);
-    console.log(newItemLoading);
 
     return (
       <div className="char__list">
