@@ -1,73 +1,66 @@
 import './charList.scss';
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { CharacterType, MarvelService } from '../../services/MarvelService';
 import { MessageError } from '../common/error/MessageError';
 import { Spinner } from '../common/spinner/Spinner';
-import { runInThisContext } from 'vm';
 
 interface ChartListPropsType {
-  onCharSelected: (id: number | null | undefined) => void;
+  onCharSelected: (id: number | undefined | null) => void;
 }
 
-class CharList extends Component<ChartListPropsType> {
-  state = {
-    charList: [] as CharacterType[],
-    loading: true,
-    error: false,
-    newItemLoading: false,
-    offset: 210,
-    charEnded: false,
-    isActive: null,
-  };
+const CharList = (props: ChartListPropsType) => {
+  const { onCharSelected } = props;
+  const [charList, setCharList] = useState<CharacterType[] | []>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [newItemLoading, setNewItemLoading] = useState<boolean>(false);
+  const [offset, setOffset] = useState<number>(210);
+  const [charEnded, setCharEnded] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<number | undefined | null>(null);
 
-  marvelService = new MarvelService();
+  const marvelService = new MarvelService();
 
-  componentDidMount = () => {
-    this.onRequest();
-  };
+  useEffect(() => {
+    onRequest();
+  }, []);
 
-  onRequest = (offset?: number) => {
-    this.onCharLoading();
-    this.marvelService
+  const onRequest = (offset?: number) => {
+    onCharLoading();
+    marvelService
       .getAllCharacters(offset)
-      .then(this.onCharactersLoaded)
-      .catch(this.onError);
+      .then(onCharactersLoaded)
+      .catch(onError);
   };
 
-  onCharLoading = () => {
-    this.setState({
-      newItemLoading: true,
-    });
+  const onCharLoading = () => {
+    setNewItemLoading(true);
   };
 
-  onCharactersLoaded = (newCharList: CharacterType[]) => {
+  const onCharactersLoaded = (newCharList: CharacterType[]) => {
     let ended = false;
     if (newCharList.length < 9) {
       ended = true;
     }
-    this.setState(() => ({
-      charList: [...this.state.charList, ...newCharList],
-      loading: false,
-      newItemLoading: false,
-      offset: this.state.offset + 9,
-      charEnded: ended,
-    }));
+    setCharList((charList) => [...charList, ...newCharList]);
+    setLoading(false);
+    setNewItemLoading(false);
+    setOffset((offset) => offset + 9);
+    setCharEnded(ended);
   };
 
-  onError = () => {
-    this.setState({ loading: false, error: true });
+  const onError = () => {
+    setLoading(false);
+    setError(true);
   };
 
   //change className in isActive clicking
-  focusOnItem = (id: number | undefined) => {
-    this.setState({
-      isActive: id,
-    });
+  const focusOnItem = (id: number | undefined) => {
+    setIsActive(id);
   };
 
   // This method created for optimization,
   // to avoid placing such a structure in the method render
-  renderItems = (charList: CharacterType[]) => {
+  const renderItems = (charList: CharacterType[]) => {
     const items = charList.map((item) => {
       const imgStyle =
         item.thumbnail ===
@@ -78,19 +71,17 @@ class CharList extends Component<ChartListPropsType> {
       return (
         <li
           className={
-            this.state.isActive === item.id
+            isActive === item.id
               ? 'char__item char__item_selected'
               : 'char__item'
           }
           key={item.id}
-          onClick={() => this.focusOnItem(item.id)}
+          onClick={() => {
+            onCharSelected(item.id);
+            focusOnItem(item.id);
+          }}
         >
-          <img
-            className={imgStyle}
-            src={item.thumbnail}
-            alt={item.name}
-            onClick={() => this.props.onCharSelected(item.id)}
-          />
+          <img className={imgStyle} src={item.thumbnail} alt={item.name} />
           <div className="char__name">{item.name}</div>
         </li>
       );
@@ -99,32 +90,28 @@ class CharList extends Component<ChartListPropsType> {
     return <ul className="char__grid">{items}</ul>;
   };
 
-  render() {
-    const { charList, loading, error, newItemLoading, offset, charEnded } =
-      this.state;
-    const items = this.renderItems(charList);
-    const messageError = error ? <MessageError /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(error || loading) && items;
-    const styleButton = charEnded
-      ? 'button_none'
-      : 'button button__main button__long';
+  const items = renderItems(charList);
+  const messageError = error ? <MessageError /> : null;
+  const spinner = loading ? <Spinner /> : null;
+  const content = !(error || loading) && items;
+  const styleButton = charEnded
+    ? 'button_none'
+    : 'button button__main button__long';
 
-    return (
-      <div className="char__list">
-        {messageError}
-        {spinner}
-        {content}
-        <button
-          className={styleButton}
-          disabled={newItemLoading}
-          onClick={() => this.onRequest(offset)}
-        >
-          <div className="inner">load more</div>
-        </button>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="char__list">
+      {messageError}
+      {spinner}
+      {content}
+      <button
+        className={styleButton}
+        disabled={newItemLoading}
+        onClick={() => onRequest(offset)}
+      >
+        <div className="inner">load more</div>
+      </button>
+    </div>
+  );
+};
 
 export default CharList;
