@@ -1,15 +1,13 @@
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
-import { CharacterType, MarvelService } from '../../services/MarvelService';
+import { CharacterType, useMarvelService } from '../../services/MarvelService';
 import { Spinner } from '../common/spinner/Spinner';
 import { MessageError } from '../common/error/MessageError';
 import { useState, useEffect } from 'react';
 
 const RandomChar = () => {
   const [char, setChar] = useState({} as CharacterType);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-  const marvelService = new MarvelService();
+  const { getCharacter, loading, error } = useMarvelService();
 
   useEffect(() => {
     updateCharacter();
@@ -17,22 +15,11 @@ const RandomChar = () => {
 
   const onChatLoaded = (char: CharacterType) => {
     setChar(char);
-    setLoading(false);
-  };
-
-  const onCharLoading = () => {
-    setLoading(true);
-  };
-
-  const onError = () => {
-    setLoading(false);
-    setError(true);
   };
 
   const updateCharacter = () => {
     const id = Math.floor(Math.random() * (1011400 - 1011005) + 1011005);
-    onCharLoading();
-    marvelService.getCharacter(id).then(onChatLoaded).catch(onError);
+    getCharacter(id).then(onChatLoaded);
   };
 
   const spinner = loading ? <Spinner /> : null;

@@ -1,6 +1,6 @@
 import './charInfo.scss';
 import { useEffect, useState } from 'react';
-import { CharacterType, MarvelService } from '../../services/MarvelService';
+import { CharacterType, useMarvelService } from '../../services/MarvelService';
 import { MessageError } from '../common/error/MessageError';
 import { Spinner } from '../common/spinner/Spinner';
 import Skeleton from '../skeleton/Skeleton';
@@ -14,7 +14,7 @@ const CharInfo = (props: CharInfoPropsType) => {
   const [char, setChar] = useState<CharacterType | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const marvelService = new MarvelService();
+  const marvelService = useMarvelService();
 
   useEffect(() => {
     if (!charId) {

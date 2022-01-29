@@ -1,6 +1,6 @@
 import './charList.scss';
 import { useEffect, useState } from 'react';
-import { CharacterType, MarvelService } from '../../services/MarvelService';
+import { CharacterType, useMarvelService } from '../../services/MarvelService';
 import { MessageError } from '../common/error/MessageError';
 import { Spinner } from '../common/spinner/Spinner';
 
@@ -18,7 +18,7 @@ const CharList = (props: ChartListPropsType) => {
   const [charEnded, setCharEnded] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<number | undefined | null>(null);
 
-  const marvelService = new MarvelService();
+  const marvelService = useMarvelService();
 
   useEffect(() => {
     onRequest();
