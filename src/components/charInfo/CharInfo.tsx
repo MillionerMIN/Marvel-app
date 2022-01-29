@@ -12,30 +12,18 @@ type CharInfoPropsType = {
 const CharInfo = (props: CharInfoPropsType) => {
   const { charId } = props;
   const [char, setChar] = useState<CharacterType | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<boolean>(false);
-  const marvelService = useMarvelService();
+
+  const { loading, error, getCharacter } = useMarvelService();
 
   useEffect(() => {
     if (!charId) {
       return;
     }
-    onCharLoading();
-    marvelService.getCharacter(charId).then(onChatLoaded).catch(onError);
+    getCharacter(charId).then(onChatLoaded);
   }, [charId]);
 
   const onChatLoaded = (char: CharacterType) => {
     setChar(char);
-    setLoading(false);
-  };
-
-  const onCharLoading = () => {
-    setLoading(false);
-  };
-
-  const onError = () => {
-    setLoading(false);
-    setError(true);
   };
 
   const messageError = error ? <MessageError /> : null;

@@ -11,29 +11,20 @@ interface ChartListPropsType {
 const CharList = (props: ChartListPropsType) => {
   const { onCharSelected } = props;
   const [charList, setCharList] = useState<CharacterType[] | []>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
   const [newItemLoading, setNewItemLoading] = useState<boolean>(false);
   const [offset, setOffset] = useState<number>(210);
   const [charEnded, setCharEnded] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<number | undefined | null>(null);
 
-  const marvelService = useMarvelService();
+  const { loading, error, getAllCharacters } = useMarvelService();
 
   useEffect(() => {
-    onRequest();
+    onRequest(offset, true);
   }, []);
 
-  const onRequest = (offset?: number) => {
-    onCharLoading();
-    marvelService
-      .getAllCharacters(offset)
-      .then(onCharactersLoaded)
-      .catch(onError);
-  };
-
-  const onCharLoading = () => {
-    setNewItemLoading(true);
+  const onRequest = (offset?: number, initial?: boolean) => {
+    initial ? setNewItemLoading(false) : setNewItemLoading(true);
+    getAllCharacters(offset).then(onCharactersLoaded);
   };
 
   const onCharactersLoaded = (newCharList: CharacterType[]) => {
@@ -42,15 +33,10 @@ const CharList = (props: ChartListPropsType) => {
       ended = true;
     }
     setCharList((charList) => [...charList, ...newCharList]);
-    setLoading(false);
+
     setNewItemLoading(false);
     setOffset((offset) => offset + 9);
     setCharEnded(ended);
-  };
-
-  const onError = () => {
-    setLoading(false);
-    setError(true);
   };
 
   //change className in isActive clicking
@@ -92,8 +78,8 @@ const CharList = (props: ChartListPropsType) => {
 
   const items = renderItems(charList);
   const messageError = error ? <MessageError /> : null;
-  const spinner = loading ? <Spinner /> : null;
-  const content = !(error || loading) && items;
+  const spinner = loading && !newItemLoading ? <Spinner /> : null;
+
   const styleButton = charEnded
     ? 'button_none'
     : 'button button__main button__long';
@@ -102,7 +88,7 @@ const CharList = (props: ChartListPropsType) => {
     <div className="char__list">
       {messageError}
       {spinner}
-      {content}
+      {items}
       <button
         className={styleButton}
         disabled={newItemLoading}
